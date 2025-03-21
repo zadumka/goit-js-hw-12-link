@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const getImgs = userRequest =>{
-return axios.get('https://pixabay.com/api/',{
+const getImgs = async ( userRequest) =>{
+const res = await   axios.get('https://pixabay.com/api/',{
     params:
             {
             key: '49241808-b19f3ed80577ae196aabc5d53',
@@ -11,7 +11,7 @@ return axios.get('https://pixabay.com/api/',{
             q: userRequest,
             }
     })
-            .then(res => res.data.hits)
+            return res.data.hits;
 
 }
  

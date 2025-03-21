@@ -5,7 +5,7 @@ const lightbox = new SimpleLightbox('.gallery a', {
   captionsData: "alt",
   captionDelay: 250,
 });
-const render = hits =>{
+const render =  hits =>{
   gallery.innerHTML = "";
   const imgCollection = [];
 
