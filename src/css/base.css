@@ -30,3 +30,25 @@ main {
 main:has(.back-link) {
   text-align: center;
 }
+input{
+  height: 24px;
+  padding: 8px 0px 8px 16px;
+  width: 272px;
+  border-color: #808080;
+    border-width: 1px;
+    border-radius: 4px;
+    border-style: solid;
+  font-family: "Montserrat", sans-serif;
+font-weight: 400;
+font-size: 16px;
+line-height: 24px;
+letter-spacing: 4%;
+color: #808080;
+}
+input:hover{
+  border: 1px solid #000000;
+}
+input:focus{
+  border: 1px solid #4E75FF;
+  color: #2E2F42;
+}

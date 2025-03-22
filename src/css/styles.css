@@ -8,6 +8,127 @@
 @import url('./reset.css');
 @import url('./base.css');
 @import url('./container.css');
-
+/* buttons */
+@import url('./buttons.css');
 /* Sections style */
 
+.gallery{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 1176px;
+  gap: 24px;
+}
+.gallery-item{
+ 
+  max-width: 360px;
+  position: relative;
+}
+.gallery-link{
+  height: 200px;
+}
+.gallery-image{
+object-fit: cover;
+position: relative;
+height: 200px;
+width: 360px;
+z-index: 1;
+}
+.desc{
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: row;
+justify-content: center;
+  padding: 4px 24px 4px 24px;
+  width: 312px;
+  height: 40px;
+  background-color: white;
+  bottom: 0; left: 0;
+
+  font-family: "Montserrat", sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 24px;
+  letter-spacing: 4%;
+  gap: 24px;
+  color: #2E2F42;
+}
+.bold{
+  font-weight: 600;
+  line-height: 16px;
+}
+.descel{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+width: fit-content;
+height: 40px;
+}
+/*        FORM           */
+.form{
+  margin-top: 36px;
+  margin-bottom: 32px;
+}
+.form > button {
+  height: 40px;
+  background-color: #4E75FF;
+  color: #FFFFFF;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  font-family: "Montserrat", sans-serif;
+  padding: 8px 16px 8px 16px;
+  border-radius: 8px;
+  border-style: none;
+}
+.form > button:hover {
+      background: #6C8CFF;
+    }
+
+
+/*           LOADER           */
+    .loader {
+      width: 64px;
+      height: 64px;
+      position: relative;
+      background: #FFF;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .loader:before {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 40px;
+      height: 40px;
+      transform: rotate(45deg) translate(30%, 40%);
+      background: #ff9371;
+      box-shadow: 32px -34px 0 5px #ff3d00;
+      animation: slide 2s infinite ease-in-out alternate;
+    }
+    .loader:after {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ff3d00;
+      transform: rotate(0deg);
+      transform-origin: 35px 145px;
+      animation: rotate 2s infinite ease-in-out;
+    }
+
+    @keyframes slide {
+      0% , 100%{ bottom: -35px}
+      25% , 75%{ bottom: -2px}
+      20% , 80%{ bottom: 2px}
+    }
+    @keyframes rotate {
+      0% { transform: rotate(-15deg)}
+      25% , 75%{ transform: rotate(0deg)}
+      100% {  transform: rotate(25deg)}
+    }
