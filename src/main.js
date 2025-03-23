@@ -14,6 +14,7 @@ searchForm.addEventListener('submit', async (evt)=>{
     evt.preventDefault();
     gallery.innerHTML =""; 
     loader.classList.toggle("loader");
+    loadMoreBtn.dataset.visible = "false";
 
  
  //                 -- por si no han teclado request --
@@ -38,8 +39,10 @@ return
  }
 //
 //                       -- buscamos --
+page = 1;
+
 try {
-    const hits = await getImgs(searchText.value);
+    const { hits, totalHits } = await getImgs(searchText.value, page);
     loader.classList.remove("loader");
         if (hits.length === 0) {
         iziToast.show({
@@ -59,7 +62,7 @@ try {
         })
         return
     }
-    render(hits);
+    render({ hits, totalHits });
     lightbox.refresh();
 } catch (error) {
     loader.classList.remove("loader");
@@ -90,7 +93,7 @@ loadMoreBtn.addEventListener("click", async (evt) => {
     page++;
    
 try {
-    const hits = await getImgs(searchText.value, page);
+    const { hits, totalHits } = await getImgs(searchText.value, page);
     loader.classList.remove("loader");
         if (hits.length === 0) {
         iziToast.show({
@@ -112,7 +115,8 @@ try {
         return
         
     }
-    await render(hits);
+    await render({ hits, totalHits });
+
   
     lightbox.refresh();
     const galleryItem = document.querySelector('.gallery-item');

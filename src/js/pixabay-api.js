@@ -14,7 +14,7 @@ const res = await axios.get('https://pixabay.com/api/',{
             }
     })
     
-            return res.data.hits;
+            return res.data;
 
 }
  

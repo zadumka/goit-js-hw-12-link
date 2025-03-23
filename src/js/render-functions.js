@@ -10,14 +10,14 @@ const lightbox = new SimpleLightbox('.gallery a', {
   captionsData: "alt",
   captionDelay: 250,
 });
-const render =  hits =>{
+const render =  ({hits, totalHits} )=>{
   
   const imgCollection = [];
 
     hits.forEach(image => {
         const {webformatURL, largeImageURL, tags, likes, views, comments, downloads} = image;
         
-        return  imgCollection.push( `<li class="gallery-item">
+          imgCollection.push( `<li class="gallery-item">
          <a class="gallery-link" href="${largeImageURL}">
            <img
              class="gallery-image"
@@ -34,9 +34,12 @@ const render =  hits =>{
        </li>`);
        });
        gallery.insertAdjacentHTML("beforeend", imgCollection.join(""));
-      
+       lightbox.refresh();
 if (hits.length===15) {
   loadMoreBtn.dataset.visible = "true";
+}
+else if(totalHits <= 15){
+  loadMoreBtn.dataset.visible = "false";
 }
 else{
   iziToast.show({
@@ -54,6 +57,8 @@ else{
     theme: 'dark',
     position: 'topRight',  
     })
+    loadMoreBtn.dataset.visible = "false";
+
 }
 };
 
