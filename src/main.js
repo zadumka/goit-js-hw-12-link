@@ -1,74 +1,107 @@
-import iziToast from 'izitoast';More actions
-import 'izitoast/dist/css/iziToast.min.css';
-
-import getImagesByQuery from './js/pixabay-api';
+import { getImagesByQuery } from './js/pixabay-api';
 import {
   createGallery,
   clearGallery,
   showLoader,
   hideLoader,
- 
+  showLoadMoreButton,
+  hideLoadMoreButton,
 } from './js/render-functions';
 
-const form = document.querySelector('.form');
+import iziToast from 'izitoast';
+import 'izitoast/dist/css/iziToast.min.css';
 
+const form = document.querySelector('form');
+const loadButton = document.querySelector('.load-btn');
 
-form.addEventListener('submit', handleSearchImages);
-
+let currentPage = 1;
+let perPage = 150;
+let currentQuery = '';
 hideLoader();
 
-function handleSearchImages(event) {
-
+form.addEventListener('submit', async event => {
   event.preventDefault();
-  clearGallery();
-  showLoader();
-  const searchImage = event.target.elements['search-text'].value.trim();
 
-
-  if (!searchImage) {
-    iziToast.error({
-      message: 'Please enter some valid search value!',
-      messageSize: '16px',
-      messageLineHeight: '24px',
-      messageColor: '#fafafb',
-      closeOnClick: true,
+  const query = event.target.elements['search-text'].value.trim();
+  if (!query) {
+    iziToast.warning({
+      title: 'warning',
+      message: 'Please enter a search term',
       position: 'topRight',
     });
-    hideLoader();
-    
     return;
   }
 
-  getImagesByQuery(searchImage)
-    .then(({ hits }) => {
-      if (hits.length === 0) {
-        iziToast.error({
-          message:
-            'Sorry, there are no images matching your search query. Please try again!',
-          messageSize: '16px',
-          messageLineHeight: '24px',
-          messageColor: '#fafafb',
-          closeOnClick: true,
-          position: 'topRight',
-        });
-        hideLoader();
-        return;
-      }
-      createGallery(hits);
-    })
-    .catch(error =>
- 
-      iziToast.error({
-        message: `${error.message}. Please try again later`,
-      
-        closeOnClick: true,
-        position: 'topRight',
-      })
-    )
-    .finally(() => {
-   
-      hideLoader();
-      form.reset();
-      hideLoadMoreButton();
+  currentQuery = query;
 
+  clearGallery();
+  showLoader();
+  hideLoadMoreButton();
+
+  try {
+    const data = await getImagesByQuery(currentQuery, currentPage, perPage);
+    const { hits } = data;
+
+    if (hits.length === 0) {
+      iziToast.info({
+        title: 'Info',
+        message:
+          'Sorry, there are no images matching your search query. Please try again!',
+        position: 'topRight',
+      });
+      hideLoadMoreButton();
+    } else {
+      createGallery(hits);
+      showLoadMoreButton();
+    }
+    const totalPages = Math.ceil(data.totalHits / perPage);
+    if (currentPage >= totalPages) {
+      hideLoadMoreButton();
+    }
+  } catch (error) {
+    iziToast.error({
+      title: 'Error',
+      message: 'Something went wrong. Please try again later.',
+      position: 'topRight',
+    });
+  } finally {
+    hideLoader();
+  }
+});
+
+loadButton.addEventListener('click', async () => {
+  currentPage += 1;
+  showLoader();
+
+  try {
+    const data = await getImagesByQuery(currentQuery, currentPage, perPage);
+    createGallery(data.hits);
+
+    const galleryItem = document.querySelector('.gallery-item');
+    if (galleryItem) {
+      const itemHeight = galleryItem.getBoundingClientRect().height;
+      window.scrollBy({
+        top: itemHeight * 2,
+        behavior: 'smooth',
+      });
+    }
+    const totalPages = Math.ceil(data.totalHits / perPage);
+    if (currentPage >= totalPages) {
+      hideLoadMoreButton();
+      iziToast.info({
+        title: 'Info',
+        message: "We're sorry, but you've reached the end of search results.",
+        position: 'topRight',
+      });
+    }
+  } catch (error) {
+    iziToast.error({
+      title: 'Error',
+      message: 'Something went wrong. Please try again later.',
+      position: 'topRight',
+    });
+  } finally {
+    hideLoader();
+  }
+});
    
