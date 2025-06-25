@@ -1,150 +1,111 @@
+import Simplelightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 import iziToast from 'izitoast';
-import "izitoast/dist/css/iziToast.min.css";
-import getImgs from'./js/pixabay-api'
-import { render, lightbox, loadMoreBtn} from './js/render-functions'
-import errorIcon from '../src/img/error.png'; 
+import 'izitoast/dist/css/iziToast.min.css';
+import { getImagesByQuery } from './js/pixabay-api'
 
-const searchForm = document.querySelector('.form');
-const searchText = document.querySelector('[name=search-text]');
-const gallery = document.querySelector('.gallery');
-const loader = document.querySelector('.loader');
-loader.classList.remove("loader");
+let lightbox = new Simplelightbox('.gallery a')
+const list = document.querySelector('.gallery')
+const form = document.querySelector('.form')
+import { clearGallery, createGallery, showLoader, hideLoader, showLoadMoreButton, hideLoadMoreButton, loadBtn, list } from './js/render-functions'
 
-searchForm.addEventListener('submit', async (evt)=>{
-    evt.preventDefault();
-    gallery.innerHTML =""; 
-    loader.classList.toggle("loader");
-    loadMoreBtn.dataset.visible = "false";
 
- 
- //                 -- por si no han teclado request --
- if (searchText.value.trim().length === 0) {
-    loader.classList.remove("loader");
-    iziToast.show({
-        title: 'Error',
-        message: 'Please enter your request',
-        color: '#EF4040',
-        titleColor: '#FFFFFF',
-        titleSize: '16px',
-        titleLineHeight: '24px',
-        messageColor: '#FFFFFF',
-        messageSize: '16px',
-        messageLineHeight: '24px',
-        iconUrl: errorIcon,
-        iconColor: '#FFFFFF',
-        theme: 'dark',
-        position: 'topRight', 
-    });
-return
- }
-//
-//                       -- buscamos --
-page = 1;
+let page = 1; 
+let currentQuery = ''; 
+let totalHits = 0; 
 
-try {
-    const { hits, totalHits } = await getImgs(searchText.value, page);
-    loader.classList.remove("loader");
-        if (hits.length === 0) {
-        iziToast.show({
-        title: '😢',
-        message: 'Sorry, there are no images matching your search query. Please try again!',
-        color: '#EF4040',
-        titleColor: '#FFFFFF',
-        titleSize: '16px',
-        titleLineHeight: '24px',
-        messageColor: '#FFFFFF',
-        messageSize: '16px',
-        messageLineHeight: '24px',
-        iconUrl: errorIcon,
-        iconColor: '#FFFFFF',
-        theme: 'dark',
-        position: 'topRight', 
+
+
+
+form.addEventListener('submit', async (event) => {
+    event.preventDefault()
+
+    const query = event.currentTarget.elements["search-text"].value.trim()
+    // console.log(query);
+
+    if (!query) {
+        iziToast.warning({
+            message: 'Please enter a search term!'
         })
         return
     }
-    render({ hits, totalHits });
-    lightbox.refresh();
-} catch (error) {
-    loader.classList.remove("loader");
-    iziToast.show({
-        title: '😢',
-        message: error.message,
-        color: '#EF4040',
-        titleColor: '#FFFFFF',
-        titleSize: '16px',
-        titleLineHeight: '24px',
-        messageColor: '#FFFFFF',
-        messageSize: '16px',
-        messageLineHeight: '24px',
-        iconUrl: errorIcon,
-        iconColor: '#FFFFFF',
-        theme: 'dark',
-        position: 'topRight',  
-        }); 
-
-}  
-
-})
-let page = 1;
-
-loadMoreBtn.addEventListener("click", async (evt) => {
-    evt.preventDefault();
-
-    page++;
+    currentQuery = query; 
    
-try {
-    const { hits, totalHits } = await getImgs(searchText.value, page);
-    loader.classList.remove("loader");
-        if (hits.length === 0) {
-        iziToast.show({
-        title: '😢',
-        message: 'Sorry, there are no images matching your search query. Please try again!',
-        color: '#EF4040',
-        titleColor: '#FFFFFF',
-        titleSize: '16px',
-        titleLineHeight: '24px',
-        messageColor: '#FFFFFF',
-        messageSize: '16px',
-        messageLineHeight: '24px',
-        iconUrl: errorIcon,
-        iconColor: '#FFFFFF',
-        theme: 'dark',
-        position: 'topRight', 
-        })
-  
-        return
-        
+
+    clearGallery();
+    showLoader();
+    hideLoadMoreButton()
+
+    try {
+        const res = await getImagesByQuery(currentQuery, page);
+        // console.log(res);
+        totalHits = res.totalHits; 
+        // console.log(totalHits);
+
+
+        if (res.hits.length === 0) {
+            iziToast.error({
+                message: 'Sorry, there are no images matching your search query. Please try again!',
+                position: 'topRight'
+            })
+        } else {
+            list.insertAdjacentHTML('beforeend', createGallery(res.hits))
+            lightbox.refresh(); 
+
+            if (res.hits.length < totalHits) {
+                showLoadMoreButton()
+            } else {
+                hideLoadMoreButton();
+                iziToast.info({
+                    message: "We're sorry, but you've reached the end of search results.",
+                    position: 'topRight'
+                });
+            }
+        }
+    } catch (error) {
+        console.log(error.message);
+        iziToast.error({
+            message: 'Something went wrong. Please try again!',
+            position: 'topRight'
+        });
+    } finally {
+        hideLoader();
     }
-    await render({ hits, totalHits });
+})
 
-  
-    lightbox.refresh();
-    const galleryItem = document.querySelector('.gallery-item');
-    const coord = galleryItem.getBoundingClientRect()
-    // console.log(coord);
-window.scrollBy({
-    top: -coord.y*2,
-   behavior: "smooth",
-  });
-} catch (error) {
-    loader.classList.remove("loader");
-    iziToast.show({
-        title: '😢',
-        message: error.message,
-        color: '#EF4040',
-        titleColor: '#FFFFFF',
-        titleSize: '16px',
-        titleLineHeight: '24px',
-        messageColor: '#FFFFFF',
-        messageSize: '16px',
-        messageLineHeight: '24px',
-        iconUrl: errorIcon,
-        iconColor: '#FFFFFF',
-        theme: 'dark',
-        position: 'topRight',  
-        }); 
-        // console.log(error);
+
+
+
+
+loadBtn.addEventListener('click', handleLoadMore);
+async function handleLoadMore() {
+   
+    page++;
+    showLoader();
+
+    try {
+        const data = await getImagesByQuery(currentQuery, page); 
+
+        
+        
+        list.insertAdjacentHTML('beforeend', createGallery(data.hits));
+        lightbox.refresh(); 
         
 
-}  
-})
+        const { height: cardHeight } = list.firstElementChild.getBoundingClientRect();
+        window.scrollBy({
+            top: cardHeight * 2,
+            behavior: 'smooth',
+        });
+
+    } catch (error) {
+        console.log(error.message);
+        iziToast.error({
+            message: 'Failed to load more images. Please try again!',
+            position: 'topRight'
+        });
+    } finally {
+        hideLoader(); 
+ 
+    }
+}
