@@ -1,65 +1,36 @@
-import iziToast from "izitoast";
-import SimpleLightbox from "simplelightbox";
-import "simplelightbox/dist/simple-lightbox.min.css";
-const gallery = document.querySelector('.gallery');
-export const loadMoreBtn = document.querySelector('.loadMore-btn');
-import errorIcon from '../img/error.png'; 
+const loader = document.querySelector('.loader')Add commentMore actions
+
+export const loadBtn = document.querySelector('.load-more-btn')
 
 
-const lightbox = new SimpleLightbox('.gallery a', {
-  captionsData: "alt",
-  captionDelay: 250,
-});
-const render =  ({hits, totalHits} )=>{
-  
-  const imgCollection = [];
 
-    hits.forEach(image => {
-        const {webformatURL, largeImageURL, tags, likes, views, comments, downloads} = image;
-        
-          imgCollection.push( `<li class="gallery-item">
-         <a class="gallery-link" href="${largeImageURL}">
-           <img
-             class="gallery-image"
-             src="${webformatURL}"
-             alt="${tags}"
-           />
-           <ul class="desc">
-               <li class="descel"><span class="bold">Likes:</span> ${likes}</li>
-               <li class="descel"><span class="bold">Views:</span> ${views}</li>
-               <li class="descel"><span class="bold">Comments:</span> ${comments}</li>
-               <li class="descel"><span class="bold">Downloads:</span> ${downloads}</li>
-             </ul>
-         </a>
-       </li>`);
-       });
-       gallery.insertAdjacentHTML("beforeend", imgCollection.join(""));
-       lightbox.refresh();
-if (hits.length===15) {
-  loadMoreBtn.dataset.visible = "true";
+export function createGallery(images) {
+    return images.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => `
+<li class="gallery-item"><a href="${largeImageURL}"><img src="${webformatURL}" alt="${tags}">
+<div class="info">
+<p><b>Likes</b>${likes}</p>
+<p><b>Views</b>${views}</p>
+<p><b>Comments</b>${comments}</p>
+<p><b>Downloads</b>${downloads}</p>
+</div>
+</a></li>
+    `).join('')
 }
-else if(totalHits <= 15){
-  loadMoreBtn.dataset.visible = "false";
+
+export function clearGallery() {
+    list.innerHTML = ''
 }
-else{
-  iziToast.show({
-    title: '😢',
-    message: "We're sorry, but you've reached the end of search results.",
-    color: '#a4ccb1',
-    titleColor: '#FFFFFF',
-    titleSize: '16px',
-    titleLineHeight: '24px',
-    messageColor: '#FFFFFF',
-    messageSize: '16px',
-    messageLineHeight: '24px',
-    iconUrl: errorIcon,
-    iconColor: '#FFFFFF',
-    theme: 'dark',
-    position: 'topRight',  
-    })
-    loadMoreBtn.dataset.visible = "false";
+
+export function showLoader() {
+    loader.classList.remove('hidden');
+}
+export function hideLoader() {
+    loader.classList.add('hidden');
+}
+export function showLoadMoreButton() {
+    loadBtn.classList.remove('load-more-btn-hidden');
+}
+export function hideLoadMoreButton() {
+    loadBtn.classList.add('load-more-btn-hidden');
 
 }
-};
-
-export { render, lightbox };
