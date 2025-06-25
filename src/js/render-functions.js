@@ -1,36 +1,44 @@
-const loader = document.querySelector('.loader')Add commentMore actions
 
-export const loadBtn = document.querySelector('.load-more-btn')
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
-
+let lightbox = new SimpleLightbox('.gallery a');
 
 export function createGallery(images) {
-    return images.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => `
-<li class="gallery-item"><a href="${largeImageURL}"><img src="${webformatURL}" alt="${tags}">
-<div class="info">
-<p><b>Likes</b>${likes}</p>
-<p><b>Views</b>${views}</p>
-<p><b>Comments</b>${comments}</p>
-<p><b>Downloads</b>${downloads}</p>
-</div>
-</a></li>
-    `).join('')
+  const gallery = document.querySelector('.gallery');
+  const markup = images
+    .map(
+      image => `
+    <li class="gallery-item">
+      <a href="${image.largeImageURL}">
+        <img class="gallery-image" src="${image.webformatURL}" alt="${image.tags}" width="360" height="200"/>
+      </a>
+      <div class="info">
+        <p><b>Likes</b> ${image.likes}</p>
+        <p><b>Views</b> ${image.views}</p>
+        <p><b>Comments</b> ${image.comments}</p>
+        <p><b>Downloads</b> ${image.downloads}</p>
+      </div>
+    </li>
+  `
+    )
+    .join('');
+
+  gallery.insertAdjacentHTML('beforeend', markup);
+  lightbox.refresh();
 }
 
 export function clearGallery() {
-    list.innerHTML = ''
+  const gallery = document.querySelector('.gallery');
+  gallery.innerHTML = '';
 }
 
 export function showLoader() {
-    loader.classList.remove('hidden');
+  const loader = document.querySelector('.loader');
+  loader.classList.remove('is-hidden');
 }
-export function hideLoader() {
-    loader.classList.add('hidden');
-}
-export function showLoadMoreButton() {
-    loadBtn.classList.remove('load-more-btn-hidden');
-}
-export function hideLoadMoreButton() {
-    loadBtn.classList.add('load-more-btn-hidden');
 
+export function hideLoader() {
+  const loader = document.querySelector('.loader');
+  loader.classList.add('is-hidden');
 }
