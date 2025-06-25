@@ -1,107 +1,99 @@
-import { getImagesByQuery } from './js/pixabay-api';
+
+import { getImagesByQuery } from './js/pixabay-api.js';
 import {
   createGallery,
   clearGallery,
   showLoader,
   hideLoader,
-  showLoadMoreButton,
-  hideLoadMoreButton,
-} from './js/render-functions';
-
+} from './js/render-functions.js';
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
-const form = document.querySelector('form');
-const loadButton = document.querySelector('.load-btn');
+const form = document.querySelector('.form');
+const loadMoreBtn = document.querySelector('.load-more');
+const loadMoreLoader = document.querySelector('.load-more-loader');
+
+loadMoreBtn.classList.add('is-hidden');
+loadMoreLoader.classList.add('is-hidden');
 
 let currentPage = 1;
-let perPage = 150;
 let currentQuery = '';
-hideLoader();
+const perPage = 20;
 
 form.addEventListener('submit', async event => {
   event.preventDefault();
 
   const query = event.target.elements['search-text'].value.trim();
+
+  loadMoreBtn.classList.add('is-hidden');
+
   if (!query) {
-    iziToast.warning({
-      title: 'warning',
-      message: 'Please enter a search term',
+    iziToast.error({
+      title: 'Warning',
+      message: 'Please enter a search term!',
       position: 'topRight',
     });
     return;
   }
 
   currentQuery = query;
+  currentPage = 1;
 
-  clearGallery();
   showLoader();
-  hideLoadMoreButton();
+  clearGallery();
 
   try {
     const data = await getImagesByQuery(currentQuery, currentPage, perPage);
-    const { hits } = data;
 
-    if (hits.length === 0) {
+    if (data.hits.length === 0) {
       iziToast.info({
         title: 'Info',
-        message:
-          'Sorry, there are no images matching your search query. Please try again!',
+        message: 'No images found for your query.',
         position: 'topRight',
       });
-      hideLoadMoreButton();
-    } else {
-      createGallery(hits);
-      showLoadMoreButton();
+      loadMoreBtn.classList.add('is-hidden');
+      return;
     }
-    const totalPages = Math.ceil(data.totalHits / perPage);
-    if (currentPage >= totalPages) {
-      hideLoadMoreButton();
-    }
-  } catch (error) {
-    iziToast.error({
-      title: 'Error',
-      message: 'Something went wrong. Please try again later.',
-      position: 'topRight',
-    });
-  } finally {
-    hideLoader();
-  }
-});
 
-loadButton.addEventListener('click', async () => {
-  currentPage += 1;
-  showLoader();
-
-  try {
-    const data = await getImagesByQuery(currentQuery, currentPage, perPage);
     createGallery(data.hits);
 
-    const galleryItem = document.querySelector('.gallery-item');
-    if (galleryItem) {
-      const itemHeight = galleryItem.getBoundingClientRect().height;
-      window.scrollBy({
-        top: itemHeight * 2,
-        behavior: 'smooth',
-      });
-    }
-    const totalPages = Math.ceil(data.totalHits / perPage);
-    if (currentPage >= totalPages) {
-      hideLoadMoreButton();
-      iziToast.info({
-        title: 'Info',
-        message: "We're sorry, but you've reached the end of search results.",
-        position: 'topRight',
-      });
+    if (data.totalHits > currentPage * perPage) {
+      loadMoreBtn.classList.remove('is-hidden');
     }
   } catch (error) {
     iziToast.error({
       title: 'Error',
-      message: 'Something went wrong. Please try again later.',
+      message: 'Something went wrong.',
       position: 'topRight',
     });
+    console.error(error);
   } finally {
     hideLoader();
   }
 });
-   
+
+loadMoreBtn.addEventListener('click', async () => {
+  currentPage += 1;
+  showLoader();
+  loadMoreLoader.classList.remove('is-hidden');
+
+  try {
+    const data = await getImagesByQuery(currentQuery, currentPage, perPage);
+
+    createGallery(data.hits);
+
+    if (data.totalHits <= currentPage * perPage) {
+      loadMoreBtn.classList.add('is-hidden');
+    }
+  } catch (error) {
+    iziToast.error({
+      title: 'Error',
+      message: 'Failed to load more images.',
+      position: 'topRight',
+    });
+    console.error(error);
+  } finally {
+    hideLoader();
+    loadMoreLoader.classList.add('is-hidden');
+  }
+});
