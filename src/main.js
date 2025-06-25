@@ -1,109 +1,74 @@
-import { getImagesByQuery } from './js/pixabay-api';More actions
-import {
-  createGallery,
-  hideLoader,
-  showLoader,
-  clearGallery,
-  showLoadMoreButton,
-  hideLoadMoreButton,
-} from './js/render-functions';
-import iziToast from 'izitoast';
+import iziToast from 'izitoast';More actions
 import 'izitoast/dist/css/iziToast.min.css';
 
-const form = document.querySelector('.form'),
-  loadMore = document.querySelector('.load-button'),
-  input = document.querySelector('.input');
+import getImagesByQuery from './js/pixabay-api';
+import {
+  createGallery,
+  clearGallery,
+  showLoader,
+  hideLoader,
+ 
+} from './js/render-functions';
+
+const form = document.querySelector('.form');
 
 
-let currentPage = 1;
-let userQuery = '';
-let hits = 0;
+form.addEventListener('submit', handleSearchImages);
 
-hideLoadMoreButton();
+hideLoader();
 
-form.addEventListener('submit', async event => {
-  currentPage = 1;
-  hits = 0;
-  userQuery = input.value.trim();
+function handleSearchImages(event) {
+
   event.preventDefault();
-  button.disabled = true;
-
-  if (userQuery === '') {
-    iziToast.error({
-      message: 'Please, fill in the field',
-      color: '#ef4040',
-      messageColor: '#fff',
-      position: 'topRight',
-    });
-    return;
-  }
-  
-
   clearGallery();
   showLoader();
-
-  try {
-    const data = await getImagesByQuery(userQuery, currentPage);
-
-    if (data.hits.length === 0) {
-      iziToast.error({
-        message:
-          'Sorry, there are no images matching your search query. Please try again!',
-        color: '#ef4040',
-        messageColor: '#fff',
-        position: 'topRight',
-      });
-      return;
-    }
+  const searchImage = event.target.elements['search-text'].value.trim();
 
 
-    hits += data.hits.length;
-    createGallery(data.hits);
-
-    if (hits >= data.totalHits) {
-      hideLoadMoreButton();
-    }
-
-    showLoadMoreButton();
-  } catch (error) {
+  if (!searchImage) {
     iziToast.error({
-      message: `${error}`,
+      message: 'Please enter some valid search value!',
+      messageSize: '16px',
+      messageLineHeight: '24px',
+      messageColor: '#fafafb',
+      closeOnClick: true,
+      position: 'topRight',
     });
-  } finally {
     hideLoader();
+    
+    return;
   }
-});
 
-loadMore.addEventListener('click', handleClick);
-
-async function handleClick() {
-
-  currentPage += 1;
-
-
-  try {
-    const data = await getImagesByQuery(userQuery, currentPage);
-
-    createGallery(data.hits);
-
+  getImagesByQuery(searchImage)
+    .then(({ hits }) => {
+      if (hits.length === 0) {
+        iziToast.error({
+          message:
+            'Sorry, there are no images matching your search query. Please try again!',
+          messageSize: '16px',
+          messageLineHeight: '24px',
+          messageColor: '#fafafb',
+          closeOnClick: true,
+          position: 'topRight',
+        });
+        hideLoader();
+        return;
+      }
+      createGallery(hits);
+    })
+    .catch(error =>
  
-
-    hits += data.hits.length;
-  
-
-    if (hits >= data.totalHits) {
-      hideLoadMoreButton();
-      iziToast.info({
-        message: "We're sorry, but you've reached the end of search results.",
-        messageColor: '#fff',
+      iziToast.error({
+        message: `${error.message}. Please try again later`,
+      
+        closeOnClick: true,
         position: 'topRight',
-      });
-    }
-  } catch (error) {
-    iziToast.error({
-      message: `${error}`,
-    });
-  } finally {
-    hideLoader();
-  }
-}
+      })
+    )
+    .finally(() => {
+   
+      hideLoader();
+      form.reset();
+      hideLoadMoreButton();
+
+   
