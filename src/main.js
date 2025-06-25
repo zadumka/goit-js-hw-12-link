@@ -56,7 +56,7 @@ form.addEventListener('submit', async event => {
       return;
     }
 
-    button.disabled = false;
+
     hits += data.hits.length;
     createGallery(data.hits);
 
@@ -77,25 +77,19 @@ form.addEventListener('submit', async event => {
 loadMore.addEventListener('click', handleClick);
 
 async function handleClick() {
-  showLoader();
+
   currentPage += 1;
-  loadMore.disabled = true;
+
 
   try {
     const data = await getImagesByQuery(userQuery, currentPage);
 
     createGallery(data.hits);
 
-    const item = document.querySelector('.gallery-item');
-    const itemSize = item.getBoundingClientRect();
-
-    window.scrollBy({
-      top: itemSize.height * 2,
-      behavior: 'smooth',
-    });
+ 
 
     hits += data.hits.length;
-    loadMore.disabled = false;
+  
 
     if (hits >= data.totalHits) {
       hideLoadMoreButton();
