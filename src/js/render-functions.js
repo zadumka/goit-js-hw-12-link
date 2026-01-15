@@ -1,44 +1,46 @@
+import SimpleLightbox from "simplelightbox";
+import "simplelightbox/dist/simple-lightbox.min.css";
+import iziToast from "izitoast";
+import "izitoast/dist/css/iziToast.min.css";
 
-import SimpleLightbox from 'simplelightbox';
-import 'simplelightbox/dist/simple-lightbox.min.css';
-
+const gallery = document.querySelector(".gallery");
 let lightbox = new SimpleLightbox('.gallery a');
 
 export function createGallery(images) {
-  const gallery = document.querySelector('.gallery');
-  const markup = images
-    .map(
-      image => `
-    <li class="gallery-item">
-      <a href="${image.largeImageURL}">
-        <img class="gallery-image" src="${image.webformatURL}" alt="${image.tags}" width="360" height="200"/>
+  const markup = images.map(img => `
+    <li>
+      <a href="${img.largeImageURL}">
+        <img src="${img.webformatURL}" alt="${img.tags}" loading="lazy">
+        <div class="info">
+          <p>Likes: ${img.likes}</p>
+          <p>Views: ${img.views}</p>
+          <p>Comments: ${img.comments}</p>
+          <p>Downloads: ${img.downloads}</p>
+        </div>
       </a>
-      <div class="info">
-        <p><b>Likes</b> ${image.likes}</p>
-        <p><b>Views</b> ${image.views}</p>
-        <p><b>Comments</b> ${image.comments}</p>
-        <p><b>Downloads</b> ${image.downloads}</p>
-      </div>
     </li>
-  `
-    )
-    .join('');
+  `).join("");
 
-  gallery.insertAdjacentHTML('beforeend', markup);
+  gallery.insertAdjacentHTML("beforeend", markup);
   lightbox.refresh();
 }
 
 export function clearGallery() {
-  const gallery = document.querySelector('.gallery');
-  gallery.innerHTML = '';
+  gallery.innerHTML = "";
 }
 
 export function showLoader() {
-  const loader = document.querySelector('.loader');
-  loader.classList.remove('is-hidden');
+  document.querySelector(".loader").style.display = "block";
 }
 
 export function hideLoader() {
-  const loader = document.querySelector('.loader');
-  loader.classList.add('is-hidden');
+  document.querySelector(".loader").style.display = "none";
+}
+
+export function showNoResults() {
+  iziToast.info({
+    title: 'Oops!',
+    message: 'Sorry, there are no images matching your search query. Please try again!',
+    position: 'topRight'
+  });
 }
